@@ -1,0 +1,66 @@
+.App {
+  max-width: 700px;
+  margin: 40px auto;
+  font-family: Arial, sans-serif;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.user-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.user-form input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.user-form button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: #1976d2;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.user-form button[type="button"] {
+  background: #aaa;
+}
+.user-form button:hover {
+  background: #1565c0;
+}
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.user-table th, .user-table td {
+  border: 1px solid #eee;
+  padding: 0.75rem;
+  text-align: left;
+}
+.user-table th {
+  background: #f5f5f5;
+}
+.user-table button {
+  margin-right: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 3px;
+  border: none;
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+}
+.user-table button:last-child {
+  background: #d32f2f;
+}
+.user-table button:hover {
+  opacity: 0.85;
+}
+.error {
+  color: #d32f2f;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
