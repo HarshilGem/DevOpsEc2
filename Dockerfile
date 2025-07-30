@@ -1,31 +1,42 @@
-# Use official Node.js LTS image
-FROM node:18-alpine as build
+# ---------- Build React Frontend ----------
+    FROM node:18 AS frontend-build
 
-# Set working directory
-WORKDIR /app
-
-# Copy package files and install dependencies for backend
-COPY package*.json ./
-RUN npm install
-
-# Copy backend source
-COPY . .
-
-# Build React frontend
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm install
-RUN npm run build
-
-# Move build to backend public directory (if needed)
-WORKDIR /app
-
-# (Optional) If your backend serves static from client/build, no need to move
-# Otherwise, uncomment below to move build to /app/public
-# RUN mv client/build public/
-
-# Expose port
-EXPOSE 4000
-
-# Start the server
-CMD ["node", "server.js"] 
+    WORKDIR /app/client
+    COPY client/package*.json ./
+    RUN npm install
+    COPY client/ ./
+    RUN npm run build
+    
+    # ---------- Build Backend ----------
+    FROM node:18 AS backend-build
+    
+    WORKDIR /app
+    COPY package*.json ./
+    RUN npm install
+    COPY . .
+    # Remove the client source (not needed in backend image)
+    RUN rm -rf client
+    
+    # ---------- Production Image ----------
+    FROM node:18 AS production
+    
+    WORKDIR /app
+    
+    # Copy backend
+    COPY --from=backend-build /app /app
+    
+    # Copy frontend build to backend's public directory
+    RUN mkdir -p /app/client/build
+    COPY --from=frontend-build /app/client/build /app/client/build
+    
+    # Install Nginx
+    RUN apt-get update && apt-get install -y nginx
+    
+    # Copy Nginx config
+    COPY nginx.conf /etc/nginx/nginx.conf
+    
+    # Expose ports
+    EXPOSE 80 4000
+    
+    # Start both backend and nginx
+    CMD service nginx start && node server.js
