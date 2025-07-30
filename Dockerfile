@@ -1,42 +1,34 @@
-# ---------- Build React Frontend ----------
-    FROM node:18 AS frontend-build
+# Use official Node.js image
+FROM node:18
 
-    WORKDIR /app/client
-    COPY client/package*.json ./
-    RUN npm install
-    COPY client/ ./
-    RUN npm run build
-    
-    # ---------- Build Backend ----------
-    FROM node:18 AS backend-build
-    
-    WORKDIR /app
-    COPY package*.json ./
-    RUN npm install
-    COPY . .
-    # Remove the client source (not needed in backend image)
-    RUN rm -rf client
-    
-    # ---------- Production Image ----------
-    FROM node:18 AS production
-    
-    WORKDIR /app
-    
-    # Copy backend
-    COPY --from=backend-build /app /app
-    
-    # Copy frontend build to backend's public directory
-    RUN mkdir -p /app/client/build
-    COPY --from=frontend-build /app/client/build /app/client/build
-    
-    # Install Nginx
-    RUN apt-get update && apt-get install -y nginx
-    
-    # Copy Nginx config
-    COPY nginx.conf /etc/nginx/nginx.conf
-    
-    # Expose ports
-    EXPOSE 80 4000
-    
-    # Start both backend and nginx
-    CMD service nginx start && node server.js
+# Set working directory
+WORKDIR /app
+
+# Copy backend files
+COPY package*.json ./
+COPY server.js ./
+COPY Routes ./Routes
+
+# Copy frontend files
+COPY client ./client
+
+# Install backend dependencies
+RUN npm install
+
+# Install frontend dependencies and build frontend
+WORKDIR /app/client
+RUN npm install
+RUN npm run build
+
+# Move build to backend's public directory (optional, if you want to serve static files)
+WORKDIR /app
+RUN mkdir -p public && cp -r client/build/* public/
+
+# Index the directory and write to a file
+RUN ls -R /app > /app/directory_index.txt
+
+# Expose port (change if your server uses a different port)
+EXPOSE 4000
+
+# Start the server and index directory at runtime (writes to runtime_index.txt)
+CMD ls -R /app > /app/runtime_index.txt && node server.js
